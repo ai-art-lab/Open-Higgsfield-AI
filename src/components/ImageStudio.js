@@ -1,4 +1,4 @@
-import { muapi } from '../lib/muapi.js';
+import { apiClient as muapi } from '../lib/apiAdapter.js';
 import {
     t2iModels, getAspectRatiosForModel, getResolutionsForModel, getQualityFieldForModel,
     i2iModels, getAspectRatiosForI2IModel, getResolutionsForI2IModel, getQualityFieldForI2IModel,

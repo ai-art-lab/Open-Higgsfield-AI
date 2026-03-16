@@ -1,5 +1,5 @@
 
-import { muapi } from '../lib/muapi.js';
+import { apiClient as muapi } from '../lib/apiAdapter.js';
 import { CameraControls } from './CameraControls.js';
 import { buildNanoBananaPrompt, CAMERA_MAP, LENS_MAP } from '../lib/promptUtils.js';
 import { AuthModal } from './AuthModal.js';
