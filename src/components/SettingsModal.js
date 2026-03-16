@@ -25,6 +25,70 @@ export function SettingsModal(onClose) {
     title.className = 'text-xl font-bold mb-4';
     title.style.marginBottom = '1rem';
 
+    // --- API Mode Toggle ---
+    const modeContainer = document.createElement('div');
+    modeContainer.style.marginBottom = '1rem';
+    modeContainer.style.padding = '0.75rem';
+    modeContainer.style.borderRadius = '0.5rem';
+    modeContainer.style.border = '1px solid var(--border-color)';
+    modeContainer.style.background = 'rgba(255,255,255,0.03)';
+
+    const modeLabel = document.createElement('label');
+    modeLabel.textContent = 'API Mode';
+    modeLabel.className = 'block text-sm text-secondary mb-2';
+    modeLabel.style.marginBottom = '0.5rem';
+    modeLabel.style.fontSize = '0.875rem';
+
+    const modeSelect = document.createElement('select');
+    modeSelect.style.width = '100%';
+    modeSelect.style.padding = '0.5rem';
+    modeSelect.style.borderRadius = '0.375rem';
+    modeSelect.style.border = '1px solid var(--border-color)';
+    modeSelect.style.background = 'var(--bg-card)';
+    modeSelect.style.color = 'inherit';
+
+    const optExternal = document.createElement('option');
+    optExternal.value = 'external';
+    optExternal.textContent = 'External API (Muapi.ai)';
+    const optInternal = document.createElement('option');
+    optInternal.value = 'internal';
+    optInternal.textContent = 'Internal API (Kaidol resource-gen)';
+    modeSelect.appendChild(optExternal);
+    modeSelect.appendChild(optInternal);
+    modeSelect.value = localStorage.getItem('api_mode') || 'external';
+
+    const internalUrlContainer = document.createElement('div');
+    internalUrlContainer.style.marginTop = '0.5rem';
+    internalUrlContainer.style.display = modeSelect.value === 'internal' ? 'block' : 'none';
+
+    const urlLabel = document.createElement('label');
+    urlLabel.textContent = 'Resource-gen URL';
+    urlLabel.style.fontSize = '0.75rem';
+    urlLabel.style.color = 'var(--text-secondary)';
+    const urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.style.width = '100%';
+    urlInput.style.padding = '0.5rem';
+    urlInput.style.marginTop = '0.25rem';
+    urlInput.style.borderRadius = '0.375rem';
+    urlInput.style.border = '1px solid var(--border-color)';
+    urlInput.style.background = 'var(--bg-card)';
+    urlInput.style.color = 'inherit';
+    urlInput.value = localStorage.getItem('kaidol_api_url') || 'http://localhost:8000';
+    urlInput.placeholder = 'http://localhost:8000';
+
+    internalUrlContainer.appendChild(urlLabel);
+    internalUrlContainer.appendChild(urlInput);
+
+    modeSelect.onchange = () => {
+        internalUrlContainer.style.display = modeSelect.value === 'internal' ? 'block' : 'none';
+    };
+
+    modeContainer.appendChild(modeLabel);
+    modeContainer.appendChild(modeSelect);
+    modeContainer.appendChild(internalUrlContainer);
+
+    // --- Muapi API Key ---
     const label = document.createElement('label');
     label.textContent = 'Muapi API Key';
     label.className = 'block text-sm text-secondary mb-2';
@@ -59,18 +123,33 @@ export function SettingsModal(onClose) {
     saveBtn.style.fontWeight = '500';
 
     saveBtn.onclick = () => {
-        const key = input.value.trim();
-        if (key) {
-            localStorage.setItem('muapi_key', key);
-            alert('API Key saved!');
+        const mode = modeSelect.value;
+        localStorage.setItem('api_mode', mode);
+
+        if (mode === 'internal') {
+            const url = urlInput.value.trim();
+            if (url) {
+                localStorage.setItem('kaidol_api_url', url);
+            }
+            alert('Internal API mode saved!');
             document.body.removeChild(overlay);
             if (onClose) onClose();
+            window.location.reload();
         } else {
-            alert('Please enter a valid key');
+            const key = input.value.trim();
+            if (key) {
+                localStorage.setItem('muapi_key', key);
+                alert('API Key saved!');
+                document.body.removeChild(overlay);
+                if (onClose) onClose();
+            } else {
+                alert('Please enter a valid key');
+            }
         }
     };
 
     modal.appendChild(title);
+    modal.appendChild(modeContainer);
     modal.appendChild(label);
     modal.appendChild(input);
 
