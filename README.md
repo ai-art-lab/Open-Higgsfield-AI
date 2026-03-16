@@ -223,3 +223,25 @@ Built with [Muapi.ai](https://muapi.ai) — the unified API for AI image and vid
 
 ---
 *Looking for a free Higgsfield AI alternative? Open Higgsfield AI is an open-source AI image and video generation studio and Higgsfield AI replacement that you can self-host, customize, and extend.*
+
+---
+
+## AI Art Lab Ecosystem
+
+This repository is part of the [AI Art Lab](https://github.com/ai-art-lab) platform.
+
+| Repository | Purpose | Status |
+|-----------|---------|--------|
+| [kaidol-resource-gen](https://github.com/ai-art-lab/kaidol-resource-gen) | Multimodal content generation (image/video/audio) | Production |
+| [kaidol-lora-factory](https://github.com/ai-art-lab/kaidol-lora-factory) | i2L LoRA auto-generation + experiments | Production |
+| [kaidol-ai](https://github.com/ai-art-lab/kaidol-ai) | LoRA creation pipeline (SD1.5/FLUX/Qwen) | Production |
+| [ai-3d-pipeline](https://github.com/ai-art-lab/ai-3d-pipeline) | 3D model to VRM 1.0 conversion | Production |
+| [kaidol-dataset-pipeline](https://github.com/ai-art-lab/kaidol-dataset-pipeline) | K-POP idol dataset pipeline | Production |
+| [helios](https://github.com/ai-art-lab/helios) | Video generation (diffusion transformer) | Development |
+| [fish-speech](https://github.com/ai-art-lab/fish-speech) | Text-to-speech (fork) | Development |
+| [comfyui-workflows](https://github.com/ai-art-lab/comfyui-workflows) | ComfyUI workflow definitions (144) | Production |
+| [**Open-Higgsfield-AI**](https://github.com/ai-art-lab/Open-Higgsfield-AI) | **AI generation web studio** | **Production** |
+| [kaidol-resource-prompt-gen](https://github.com/ai-art-lab/kaidol-resource-prompt-gen) | Prompting guides (9 platforms) | Documentation |
+| [music-video-storyboard-ai-visualizer](https://github.com/ai-art-lab/music-video-storyboard-ai-visualizer) | MV storyboard visualizer | Prototype |
+| [storyboard-ai-sketcher](https://github.com/ai-art-lab/storyboard-ai-sketcher) | Script-to-storyboard sketcher | Prototype |
+| [kaidol-common](https://github.com/ai-art-lab/kaidol-common) | Shared libraries (QC, GPU, schemas) | New |
