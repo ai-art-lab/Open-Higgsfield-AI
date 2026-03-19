@@ -1,12 +1,17 @@
 import { getModelById, getVideoModelById, getI2IModelById, getI2VModelById, getV2VModelById } from './models.js';
+import { kaidolApi } from './kaidol_api.js';
+
+const getApiMode = () => localStorage.getItem('api_mode') || 'external';
+const isInternalMode = () => getApiMode() === 'internal';
 
 export class MuapiClient {
     constructor() {
         // Ideally user provides this in settings
-        this.baseUrl = import.meta.env.DEV ? '' : 'https://api.muapi.ai';
+        this.baseUrl = import.meta.env.VITE_MUAPI_BASE_URL || (import.meta.env.DEV ? '' : 'https://api.muapi.ai');
     }
 
     getKey() {
+        if (isInternalMode()) return 'internal';
         const key = localStorage.getItem('muapi_key');
         if (!key) throw new Error('API Key missing. Please set it in Settings.');
         return key;
@@ -25,6 +30,10 @@ export class MuapiClient {
      * @param {string} [params.image_url] - If present, treats as Image-to-Image
      */
     async generateImage(params) {
+        if (isInternalMode()) {
+            return kaidolApi.generateImage(params);
+        }
+
         const key = this.getKey();
 
         // Resolve endpoint from model definition
@@ -121,6 +130,10 @@ export class MuapiClient {
      * @param {number} interval - Polling interval in ms (default 2000)
      */
     async pollForResult(requestId, key, maxAttempts = 60, interval = 2000) {
+        if (isInternalMode()) {
+            return kaidolApi.pollForResult(requestId, key, maxAttempts, interval);
+        }
+
         const pollUrl = `${this.baseUrl}/api/v1/predictions/${requestId}/result`;
 
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -169,6 +182,10 @@ export class MuapiClient {
     }
 
     async generateVideo(params) {
+        if (isInternalMode()) {
+            return kaidolApi.generateVideo(params);
+        }
+
         const key = this.getKey();
 
         const modelInfo = getVideoModelById(params.model);
@@ -236,6 +253,10 @@ export class MuapiClient {
      * @param {string} [params.resolution]
      */
     async generateI2I(params) {
+        if (isInternalMode()) {
+            return kaidolApi.generateI2I(params);
+        }
+
         const key = this.getKey();
         const modelInfo = getI2IModelById(params.model);
         const endpoint = modelInfo?.endpoint || params.model;
@@ -306,6 +327,10 @@ export class MuapiClient {
      * @param {string} [params.quality]
      */
     async generateI2V(params) {
+        if (isInternalMode()) {
+            return kaidolApi.generateI2V(params);
+        }
+
         const key = this.getKey();
         const modelInfo = getI2VModelById(params.model);
         const endpoint = modelInfo?.endpoint || params.model;
@@ -369,6 +394,10 @@ export class MuapiClient {
      * @returns {Promise<string>} The hosted URL of the uploaded file
      */
     async uploadFile(file) {
+        if (isInternalMode()) {
+            return kaidolApi.uploadFile(file);
+        }
+
         const key = this.getKey();
         const url = `${this.baseUrl}/api/v1/upload_file`;
 
@@ -403,6 +432,10 @@ export class MuapiClient {
      * @param {string} params.video_url - The uploaded video URL
      */
     async processV2V(params) {
+        if (isInternalMode()) {
+            return kaidolApi.processV2V(params);
+        }
+
         const key = this.getKey();
         const modelInfo = getV2VModelById(params.model);
         const endpoint = modelInfo?.endpoint || params.model;

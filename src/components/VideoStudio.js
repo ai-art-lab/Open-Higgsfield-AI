@@ -17,7 +17,6 @@ export function VideoStudio() {
     let selectedResolution = defaultModel.inputs?.resolution?.default || '';
     let selectedQuality = defaultModel.inputs?.quality?.default || '';
     let lastGenerationId = null;
-    let lastGenerationModel = null;
     let dropdownOpen = null;
     let uploadedImageUrl = null;
     let imageMode = false; // false = t2v models, true = i2v models
@@ -228,7 +227,7 @@ export function VideoStudio() {
     textarea.oninput = () => {
         textarea.style.height = 'auto';
         const maxHeight = window.innerWidth < 768 ? 150 : 250;
-        textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
+        textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
     };
 
     topRow.appendChild(textarea);
@@ -455,7 +454,9 @@ export function VideoStudio() {
                 const generationModels = imageMode ? i2vModels : t2vModels;
                 const filteredMain = generationModels
                     .filter(m => m.name.toLowerCase().includes(lf) || m.id.toLowerCase().includes(lf));
-                filteredMain.forEach(m => list.appendChild(makeModelItem(m, false)));
+                filteredMain.forEach((m) => {
+                    list.appendChild(makeModelItem(m, false));
+                });
 
                 // Video Tools section
                 const filteredV2V = v2vModels.filter(m => m.name.toLowerCase().includes(lf) || m.id.toLowerCase().includes(lf));
@@ -464,7 +465,9 @@ export function VideoStudio() {
                     sectionLabel.className = 'text-[10px] font-bold text-orange-400/70 uppercase tracking-widest px-3 py-2 mt-1 border-t border-white/5';
                     sectionLabel.textContent = 'Video Tools';
                     list.appendChild(sectionLabel);
-                    filteredV2V.forEach(m => list.appendChild(makeModelItem(m, true)));
+                    filteredV2V.forEach((m) => {
+                        list.appendChild(makeModelItem(m, true));
+                    });
                 }
             };
 
@@ -719,10 +722,8 @@ export function VideoStudio() {
                 // Restore extend context when viewing a seedance-v2.0 generation
                 if (entry.model === 'seedance-v2.0-t2v' || entry.model === 'seedance-v2.0-i2v') {
                     lastGenerationId = entry.id;
-                    lastGenerationModel = entry.model;
                 } else {
                     lastGenerationId = null;
-                    lastGenerationModel = null;
                 }
                 showVideoInCanvas(entry.url, entry.model);
                 historyList.querySelectorAll('div').forEach(t => {
@@ -750,7 +751,7 @@ export function VideoStudio() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(blobUrl);
-        } catch (err) {
+        } catch {
             window.open(url, '_blank');
         }
     };
@@ -759,20 +760,23 @@ export function VideoStudio() {
     try {
         const saved = JSON.parse(localStorage.getItem('video_history') || '[]');
         if (saved.length > 0) {
-            saved.forEach(e => generationHistory.push(e));
+            saved.forEach((e) => {
+                generationHistory.push(e);
+            });
             historySidebar.classList.remove('translate-x-full', 'opacity-0');
             historySidebar.classList.add('translate-x-0', 'opacity-100');
             renderHistory();
         }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
 
     // --- Resume any pending video generations from a previous session ---
     (async () => {
         const pending = getPendingJobs('video');
         if (!pending.length) return;
 
+        const apiMode = localStorage.getItem('api_mode') || 'external';
         const apiKey = localStorage.getItem('muapi_key');
-        if (!apiKey) return; // can't poll without key; jobs remain for next time
+        if (apiMode === 'external' && !apiKey) return;
 
         const banner = document.createElement('div');
         banner.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-[#111] border border-white/10 text-white text-sm px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3';
@@ -883,8 +887,9 @@ export function VideoStudio() {
             }
         }
 
+        const apiMode = localStorage.getItem('api_mode') || 'external';
         const apiKey = localStorage.getItem('muapi_key');
-        if (!apiKey) {
+        if (apiMode === 'external' && !apiKey) {
             AuthModal(() => generateBtn.click());
             return;
         }
@@ -906,11 +911,10 @@ export function VideoStudio() {
             if (v2vMode) {
                 const res = await muapi.processV2V({ model: selectedModel, video_url: uploadedVideoUrl, onRequestId });
                 console.log('[VideoStudio] V2V response:', res);
-                if (res && res.url) {
+                if (res?.url) {
                     if (capturedRequestId) removePendingJob(capturedRequestId);
                     const genId = res.id || capturedRequestId || Date.now().toString();
                     lastGenerationId = null;
-                    lastGenerationModel = null;
                     addToHistory({ id: genId, url: res.url, prompt: '', model: selectedModel, timestamp: new Date().toISOString() });
                     showVideoInCanvas(res.url, selectedModel);
                 } else {
@@ -938,15 +942,13 @@ export function VideoStudio() {
                 const res = await muapi.generateI2V(i2vParams);
                 console.log('[VideoStudio] I2V response:', res);
 
-                if (res && res.url) {
+                if (res?.url) {
                     if (capturedRequestId) removePendingJob(capturedRequestId);
                     const genId = res.id || capturedRequestId || Date.now().toString();
                     if (selectedModel === 'seedance-v2.0-i2v') {
                         lastGenerationId = genId;
-                        lastGenerationModel = selectedModel;
                     } else {
                         lastGenerationId = null;
-                        lastGenerationModel = null;
                     }
                     addToHistory({ id: genId, url: res.url, prompt, model: selectedModel, aspect_ratio: selectedAr, duration: selectedDuration, timestamp: new Date().toISOString() });
                     showVideoInCanvas(res.url, selectedModel);
@@ -981,16 +983,14 @@ export function VideoStudio() {
 
             console.log('[VideoStudio] Full response:', res);
 
-            if (res && res.url) {
+            if (res?.url) {
                 if (capturedRequestId) removePendingJob(capturedRequestId);
                 const genId = res.id || capturedRequestId || Date.now().toString();
                 // Store request_id for seedance-v2.0 models (enables Extend button)
                 if (selectedModel === 'seedance-v2.0-t2v' || selectedModel === 'seedance-v2.0-i2v') {
                     lastGenerationId = genId;
-                    lastGenerationModel = selectedModel;
                 } else {
                     lastGenerationId = null;
-                    lastGenerationModel = null;
                 }
 
                 addToHistory({

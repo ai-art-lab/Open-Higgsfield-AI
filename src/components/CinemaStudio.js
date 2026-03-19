@@ -109,7 +109,7 @@ export function CinemaStudio() {
     textarea.rows = 1;
     textarea.oninput = function () {
         this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
+        this.style.height = `${this.scrollHeight}px`;
     };
     inputRow.appendChild(textarea);
 
@@ -123,13 +123,15 @@ export function CinemaStudio() {
     // Helper: Create Dropdown
     const createDropdown = (items, selected, onSelect, trigger) => {
         const existing = document.querySelectorAll('.custom-dropdown');
-        existing.forEach(el => el.remove());
+        existing.forEach((el) => {
+            el.remove();
+        });
 
         const rect = trigger.getBoundingClientRect();
         const menu = document.createElement('div');
         menu.className = 'custom-dropdown fixed bg-[#1a1a1a] border border-white/10 rounded-xl py-1 shadow-2xl z-50 flex flex-col min-w-[100px] animate-fade-in';
-        menu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-        menu.style.left = rect.left + 'px';
+        menu.style.bottom = `${window.innerHeight - rect.top + 8}px`;
+        menu.style.left = `${rect.left}px`;
 
         items.forEach(item => {
             const btn = document.createElement('button');
@@ -378,10 +380,12 @@ export function CinemaStudio() {
     try {
         const saved = JSON.parse(localStorage.getItem('cinema_history') || '[]');
         if (saved.length > 0) {
-            saved.forEach(e => generationHistory.push(e));
+            saved.forEach((e) => {
+                generationHistory.push(e);
+            });
             renderHistory();
         }
-    } catch (e) { }
+    } catch { }
 
     // Actions
     newPromptBtn.onclick = resetToPrompt;
@@ -405,7 +409,7 @@ export function CinemaStudio() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(blobUrl);
-        } catch (err) {
+        } catch {
             window.open(resultImg.src, '_blank');
         }
     };
@@ -417,8 +421,9 @@ export function CinemaStudio() {
         const basePrompt = textarea.value.trim();
         if (!basePrompt) return;
 
+        const apiMode = localStorage.getItem('api_mode') || 'external';
         const apiKey = localStorage.getItem('muapi_key');
-        if (!apiKey) {
+        if (apiMode === 'external' && !apiKey) {
             AuthModal(() => generateBtn.click());
             return;
         }
@@ -444,7 +449,7 @@ export function CinemaStudio() {
                 negative_prompt: "blurry, low quality, distortion, bad composition"
             });
 
-            if (res && res.url) {
+            if (res?.url) {
                 // Save to history
                 addToHistory({
                     url: res.url,
@@ -463,7 +468,7 @@ export function CinemaStudio() {
 
         } catch (e) {
             console.error(e);
-            alert('Generation Failed: ' + e.message);
+            alert(`Generation Failed: ${e.message}`);
         } finally {
             generateBtn.disabled = false;
             generateBtn.innerHTML = `GENERATE ✨`;

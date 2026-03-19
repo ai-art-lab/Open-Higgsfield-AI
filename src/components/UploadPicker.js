@@ -1,4 +1,4 @@
-import { muapi } from '../lib/muapi.js';
+import { apiClient as muapi } from '../lib/apiAdapter.js';
 import { AuthModal } from './AuthModal.js';
 import { getUploadHistory, saveUpload, removeUpload, generateThumbnail } from '../lib/uploadHistory.js';
 

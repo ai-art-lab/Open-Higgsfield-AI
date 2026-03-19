@@ -2099,7 +2099,7 @@ export const getAspectRatiosForModel = (modelId) => {
   if (!model) return ['1:1'];
 
   const arInput = model.inputs?.aspect_ratio;
-  if (arInput && arInput.enum) {
+  if (arInput?.enum) {
     return arInput.enum;
   }
 
@@ -2511,7 +2511,7 @@ export const getAspectRatiosForVideoModel = (modelId) => {
   const model = getVideoModelById(modelId);
   if (!model) return ['16:9'];
   const arInput = model.inputs?.aspect_ratio;
-  if (arInput && arInput.enum) return arInput.enum;
+  if (arInput?.enum) return arInput.enum;
   return ['16:9', '9:16', '1:1'];
 };
 
@@ -2519,7 +2519,7 @@ export const getDurationsForModel = (modelId) => {
   const model = getVideoModelById(modelId);
   if (!model) return [5];
   const durInput = model.inputs?.duration;
-  if (durInput && durInput.enum) return durInput.enum;
+  if (durInput?.enum) return durInput.enum;
   if (durInput) return [durInput.default || 5];
   return [];
 };
@@ -2528,7 +2528,7 @@ export const getResolutionsForVideoModel = (modelId) => {
   const model = getVideoModelById(modelId);
   if (!model) return [];
   const resInput = model.inputs?.resolution;
-  if (resInput && resInput.enum) return resInput.enum;
+  if (resInput?.enum) return resInput.enum;
   return [];
 };
 // Auto-generated from schema_data.json — Image to Image models
@@ -7925,21 +7925,21 @@ export const getI2VModelById = (id) => i2vModels.find(m => m.id === id);
 export const getAspectRatiosForI2IModel = (modelId) => {
     const model = getI2IModelById(modelId);
     if (!model) return ['1:1'];
-    if (model.inputs && model.inputs.aspect_ratio && model.inputs.aspect_ratio.enum) return model.inputs.aspect_ratio.enum;
+    if (model.inputs?.aspect_ratio?.enum) return model.inputs.aspect_ratio.enum;
     return ['1:1', '16:9', '9:16'];
 };
 
 export const getAspectRatiosForI2VModel = (modelId) => {
     const model = getI2VModelById(modelId);
     if (!model) return ['16:9'];
-    if (model.inputs && model.inputs.aspect_ratio && model.inputs.aspect_ratio.enum) return model.inputs.aspect_ratio.enum;
+    if (model.inputs?.aspect_ratio?.enum) return model.inputs.aspect_ratio.enum;
     return ['16:9', '9:16', '1:1'];
 };
 
 export const getDurationsForI2VModel = (modelId) => {
     const model = getI2VModelById(modelId);
     if (!model) return [];
-    const dur = model.inputs && model.inputs.duration;
+    const dur = model.inputs?.duration;
     if (!dur) return [];
     if (dur.enum) return dur.enum;
     if (dur.minValue !== undefined && dur.maxValue !== undefined && dur.step) {
@@ -7954,8 +7954,8 @@ export const getDurationsForI2VModel = (modelId) => {
 export const getResolutionsForI2VModel = (modelId) => {
     const model = getI2VModelById(modelId);
     if (!model) return [];
-    const res = model.inputs && model.inputs.resolution;
-    if (res && res.enum) return res.enum;
+    const res = model.inputs?.resolution;
+    if (res?.enum) return res.enum;
     return [];
 };
 
@@ -8014,3 +8014,59 @@ export const v2vModels = [
 ];
 
 export const getV2VModelById = (id) => v2vModels.find(m => m.id === id);
+
+export const internalImageModels = [
+  { id: 'internal-flux', name: 'Kaidol Flux', workflow: 'flux_lora' },
+  { id: 'internal-sdxl', name: 'Kaidol SDXL', workflow: 'sdxl' },
+  { id: 'internal-qwen', name: 'Kaidol Qwen', workflow: 'qwen_rapid_aio' },
+];
+
+export const internalVideoModels = [
+  { id: 'internal-wan22', name: 'Kaidol WAN 2.2', workflow: 'wan22_t2v' },
+  { id: 'internal-ltx2', name: 'Kaidol LTX-2', workflow: 'ltx2_t2v' },
+  { id: 'internal-framepack', name: 'Kaidol FramePack', workflow: 'framepack_i2v' },
+];
+
+const INTERNAL_IMAGE_WORKFLOW_MAP = {
+  'flux-dev': 'flux_lora',
+  'flux-schnell': 'flux_schnell',
+  'sdxl-image': 'sdxl',
+  'qwen-image': 'qwen_rapid_aio',
+};
+
+const INTERNAL_VIDEO_WORKFLOW_MAP = {
+  'wan2.2-text-to-video': 'wan22_t2v',
+  'wan2.1-text-to-video': 'wan22_t2v',
+  'ltx-2-19b-text-to-video': 'ltx2_t2v',
+  'ltx-2-pro-text-to-video': 'ltx2_t2v',
+  'ltx-2-fast-text-to-video': 'ltx2_t2v_optimized',
+};
+
+const INTERNAL_I2I_WORKFLOW_MAP = {
+  'flux-redux': 'qwen_rapid_aio',
+  'qwen-image-edit': 'qwen_image_edit',
+};
+
+const INTERNAL_I2V_WORKFLOW_MAP = {
+  'wan2.2-image-to-video': 'wan22_i2v',
+  'ltx-2-image-to-video': 'ltx2_i2v',
+  'framepack-image-to-video': 'framepack_i2v',
+};
+
+export const getInternalImageWorkflow = (modelId) => {
+  const fromPreset = internalImageModels.find((model) => model.id === modelId)?.workflow;
+  return fromPreset || INTERNAL_IMAGE_WORKFLOW_MAP[modelId] || 'flux_lora';
+};
+
+export const getInternalVideoWorkflow = (modelId) => {
+  const fromPreset = internalVideoModels.find((model) => model.id === modelId)?.workflow;
+  return fromPreset || INTERNAL_VIDEO_WORKFLOW_MAP[modelId] || 'wan22_t2v';
+};
+
+export const getInternalI2IWorkflow = (modelId) => {
+  return INTERNAL_I2I_WORKFLOW_MAP[modelId] || getInternalImageWorkflow(modelId);
+};
+
+export const getInternalI2VWorkflow = (modelId) => {
+  return INTERNAL_I2V_WORKFLOW_MAP[modelId] || getInternalVideoWorkflow(modelId);
+};

@@ -114,7 +114,7 @@ export function ImageStudio() {
     textarea.oninput = () => {
         textarea.style.height = 'auto';
         const maxHeight = window.innerWidth < 768 ? 150 : 250;
-        textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
+        textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
     };
 
     topRow.appendChild(textarea);
@@ -487,7 +487,7 @@ export function ImageStudio() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(blobUrl);
-        } catch (err) {
+        } catch {
             // Fallback: open in new tab
             window.open(url, '_blank');
         }
@@ -497,20 +497,23 @@ export function ImageStudio() {
     try {
         const saved = JSON.parse(localStorage.getItem('muapi_history') || '[]');
         if (saved.length > 0) {
-            saved.forEach(e => generationHistory.push(e));
+            saved.forEach((e) => {
+                generationHistory.push(e);
+            });
             historySidebar.classList.remove('translate-x-full', 'opacity-0');
             historySidebar.classList.add('translate-x-0', 'opacity-100');
             renderHistory();
         }
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
 
     // --- Resume any pending image generations from a previous session ---
     (async () => {
         const pending = getPendingJobs('image');
         if (!pending.length) return;
 
+        const apiMode = localStorage.getItem('api_mode') || 'external';
         const apiKey = localStorage.getItem('muapi_key');
-        if (!apiKey) return; // can't poll without key; jobs remain for next time
+        if (apiMode === 'external' && !apiKey) return;
 
         const banner = document.createElement('div');
         banner.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-[#111] border border-white/10 text-white text-sm px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3';
@@ -595,8 +598,9 @@ export function ImageStudio() {
             }
         }
 
+        const apiMode = localStorage.getItem('api_mode') || 'external';
         const apiKey = localStorage.getItem('muapi_key');
-        if (!apiKey) {
+        if (apiMode === 'external' && !apiKey) {
             AuthModal(() => generateBtn.click());
             return;
         }
@@ -644,7 +648,7 @@ export function ImageStudio() {
 
             console.log('[ImageStudio] Full response:', res);
 
-            if (res && res.url) {
+            if (res?.url) {
                 if (capturedRequestId) removePendingJob(capturedRequestId);
                 addToHistory({
                     id: res.id || capturedRequestId || Date.now().toString(),
